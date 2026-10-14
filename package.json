@@ -1,0 +1,15 @@
+{
+  "name": "cursiva-lead-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram-бот заявок Cursiva",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.65.1"
+  }
+}
