@@ -54,6 +54,7 @@ function startBot(botToken) {
     { command: "done", description: "Отметить задачу сделанной" },
     { command: "income", description: "Записать доход" },
     { command: "expense", description: "Записать расход" },
+    { command: "office", description: "Открыть офис" },
     { command: "help", description: "Команды" },
   ];
   bot.setMyCommands(commands).catch((error) => console.log(error));

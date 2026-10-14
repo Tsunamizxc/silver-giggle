@@ -66,7 +66,7 @@ async function sendLeads(bot, msg) {
   await bot.sendMessage(msg.chat.id, text, {
     parse_mode: "HTML",
     disable_web_page_preview: true,
-    reply_markup: inlineWebApp(),
+    reply_markup: inlineWebApp(msg.chat.type),
   });
 }
 
@@ -165,10 +165,14 @@ async function helpText(bot, msg) {
 
 Статусы: активный, в работе, закрыт, отменен.
 В боте может быть не больше ${maxUsers()} человек.
-Бота можно добавить в группу: заявки будут приходить и туда, команды те же.`;
+В группе работают те же команды. Кнопка «Открыть офис» под сообщением открывает приложение и в беседе.`;
 
   await bot.sendMessage(msg.chat.id, text, {
-    reply_markup: msg.chat.type === "private" ? replyKeyboard() : inlineWebApp(),
+    reply_markup: replyKeyboard(msg.chat.type),
+  });
+  await bot.sendMessage(msg.chat.id, "Открыть офис", {
+    disable_web_page_preview: true,
+    reply_markup: inlineWebApp(msg.chat.type),
   });
 }
 

@@ -9,16 +9,13 @@ async function handleWebApp(bot, msg) {
 
 Текстом: /new Иван 79991234567 сайт, /task купить домен, /income 15000 оплата, /expense 3000 реклама.`;
 
-  const markup = msg.chat.type === "private"
-    ? { reply_markup: replyKeyboard() }
-    : { reply_markup: inlineWebApp() };
-
-  await bot.sendMessage(chatId, text, markup);
-  if (msg.chat.type === "private") {
-    await bot.sendMessage(chatId, "Список заявок", {
-      reply_markup: inlineWebApp(),
-    });
-  }
+  await bot.sendMessage(chatId, text, {
+    reply_markup: replyKeyboard(msg.chat.type),
+  });
+  await bot.sendMessage(chatId, "Открыть офис", {
+    disable_web_page_preview: true,
+    reply_markup: inlineWebApp(msg.chat.type),
+  });
 }
 
 module.exports = { handleWebApp };

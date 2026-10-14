@@ -1,4 +1,5 @@
 const { removeManager } = require("./registerManager");
+const { inlineWebApp } = require("../components/inlineWebApp");
 
 require("dotenv").config();
 
@@ -42,7 +43,7 @@ async function deliverPending(bot) {
         await bot.sendMessage(chat.chat_id, item.text, {
           parse_mode: "HTML",
           disable_web_page_preview: true,
-          reply_markup: item.reply_markup || undefined,
+          reply_markup: inlineWebApp(Number(chat.chat_id) < 0 ? "supergroup" : "private"),
         });
         delivered = true;
       } catch (error) {

@@ -1,6 +1,8 @@
 const { startCommand } = require("../commands/start");
 const { helpText, sendLeads, setLeadStatus, setLeadNote, listUsers, changeUser } = require("../commands/text");
 const { openOffice, createLead, createTask, listTasks, completeTask, addMoney } = require("../commands/office");
+const { inlineWebApp } = require("../components/inlineWebApp");
+const { replyKeyboard } = require("../components/replyKeyboard");
 const { api } = require("./api");
 
 function commandParts(text) {
@@ -30,6 +32,7 @@ async function handleMessage(bot, msg) {
     "/done": "done",
     "/income": "income",
     "/expense": "expense",
+    "/office": "office",
     "заявки": "leads",
     "офис": "office",
     "помощь": "help",
@@ -173,10 +176,13 @@ async function handleMembership(bot, update) {
   });
   if (!saved.ok) return;
 
-  await bot.sendMessage(
-    chat.id,
-    "Чат подключён. Заявки с cursiva.ru будут приходить сюда.\n\nКоманды: /leads, /new, /task, /income, /expense, /help"
-  );
+  await bot.sendMessage(chat.id, "Чат подключён. Заявки с cursiva.ru будут приходить сюда.\n\nКоманды те же, что в личке: /leads, /new, /task, /income, /expense, /help", {
+    reply_markup: replyKeyboard(chat.type),
+  });
+  await bot.sendMessage(chat.id, "Открыть офис", {
+    disable_web_page_preview: true,
+    reply_markup: inlineWebApp(chat.type),
+  });
 }
 
 module.exports = { handleMessage, handleMembership };

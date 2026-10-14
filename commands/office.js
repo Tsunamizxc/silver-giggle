@@ -12,7 +12,7 @@ async function fail(bot, msg, result, fallback) {
 
 async function openOffice(bot, msg) {
   await bot.sendMessage(msg.chat.id, "Офис Cursiva: заявки, задачи и деньги. Внизу экрана три раздела.", {
-    reply_markup: inlineWebApp(),
+    reply_markup: inlineWebApp(msg.chat.type),
   });
 }
 
@@ -37,7 +37,7 @@ async function createLead(bot, msg, args) {
     return;
   }
   await bot.sendMessage(msg.chat.id, `Заявка № ${result.payload.id} сохранена.`, {
-    reply_markup: inlineWebApp(),
+    reply_markup: inlineWebApp(msg.chat.type),
   });
 }
 
