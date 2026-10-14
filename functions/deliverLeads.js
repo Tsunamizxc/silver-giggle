@@ -32,11 +32,10 @@ async function deliverPending(bot) {
   const items = Array.isArray(payload.items) ? payload.items : [];
   if (!items.length) return;
 
-  const sentIds = [];
+  const deliveries = [];
 
   for (const item of items) {
     const targets = Array.isArray(item.chats) ? item.chats : [];
-    let delivered = false;
 
     for (const chat of targets) {
       try {
@@ -45,7 +44,7 @@ async function deliverPending(bot) {
           disable_web_page_preview: true,
           reply_markup: inlineWebApp(Number(chat.chat_id) < 0 ? "supergroup" : "private"),
         });
-        delivered = true;
+        deliveries.push({ id: item.id, chat_id: chat.chat_id });
       } catch (error) {
         const description = String(error.message || error);
         console.log(description);
@@ -54,11 +53,9 @@ async function deliverPending(bot) {
         }
       }
     }
-
-    if (delivered) sentIds.push(item.id);
   }
 
-  if (!sentIds.length) return;
+  if (!deliveries.length) return;
 
   try {
     await fetch(`${url}?action=ack`, {
@@ -67,7 +64,7 @@ async function deliverPending(bot) {
         "Content-Type": "application/json",
         "X-Bot-Secret": secret,
       },
-      body: JSON.stringify({ ids: sentIds }),
+      body: JSON.stringify({ deliveries }),
     });
   } catch (error) {
     console.log(error.message || error);
