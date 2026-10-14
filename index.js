@@ -1,6 +1,7 @@
-const { handleMessage } = require("./functions/handleMessage");
+const { handleMembership, handleMessage } = require("./functions/handleMessage");
 const { deliverPending } = require("./functions/deliverLeads");
 const { flushManagers } = require("./functions/registerManager");
+const { api } = require("./functions/api");
 
 require("dotenv").config();
 
@@ -18,7 +19,7 @@ function startBot(botToken) {
   const bot = new TelegramBot(botToken, { polling: true });
 
   function paintButton(button) {
-    if (!button || button.style || button.request_contact) {
+    if (!button || button.style || button.web_app || button.request_contact) {
       return button;
     }
     return { ...button, style: "primary" };
@@ -44,10 +45,13 @@ function startBot(botToken) {
     return sendMessage(chatId, text, options);
   };
 
-  bot.setMyCommands([
-    { command: "start", description: "Открыть заявки" },
-    { command: "help", description: "Как это работает" },
-  ]).catch((error) => console.log(error));
+  const commands = [
+    { command: "start", description: "Открыть меню" },
+    { command: "leads", description: "Последние заявки" },
+    { command: "help", description: "Команды и статусы" },
+  ];
+  bot.setMyCommands(commands).catch((error) => console.log(error));
+  bot.setMyCommands(commands, { scope: { type: "all_group_chats" } }).catch((error) => console.log(error));
 
   const webAppUrl = process.env.WEB_APP_URL || "https://cursivalead.cursiva-dev.ru/";
 
@@ -83,16 +87,30 @@ function startBot(botToken) {
     }
   });
 
+  bot.on("my_chat_member", async (update) => {
+    try {
+      await handleMembership(bot, update);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   bot.on("polling_error", (error) => {
     console.log(error.message || error);
   });
 
   let busy = false;
+  let ownerReady = false;
 
   async function tick() {
     if (busy) return;
     busy = true;
     try {
+      const ownerId = Number(process.env.OWNER_ID || 0);
+      if (ownerId && !ownerReady) {
+        const ready = await api("bootstrap", { method: "POST", body: { owner_id: ownerId, name: "" } });
+        ownerReady = !!(ready.ok && ready.payload && ready.payload.ok);
+      }
       await flushManagers(bot);
       await deliverPending(bot);
     } catch (error) {

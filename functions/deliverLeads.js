@@ -48,8 +48,8 @@ async function deliverPending(bot) {
       } catch (error) {
         const description = String(error.message || error);
         console.log(description);
-        if (/blocked|chat not found|deactivated/i.test(description)) {
-          await removeManager(chat.telegram_id);
+        if (/blocked|chat not found|deactivated|kicked/i.test(description)) {
+          await removeManager(chat.chat_id);
         }
       }
     }

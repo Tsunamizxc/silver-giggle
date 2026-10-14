@@ -1,14 +1,25 @@
 const { replyKeyboard } = require("../components/replyKeyboard");
+const { inlineWebApp } = require("../components/inlineWebApp");
 
-async function handleWebApp(bot, msg, siteReady) {
+async function handleWebApp(bot, msg) {
   const chatId = msg.chat.id;
-  const readyText = siteReady
-    ? "Когда на cursiva.ru оставляют заявку, сюда приходит сообщение. Список и статусы — в «Открыть заявки»."
-    : "Меню уже здесь. Список откроется после загрузки сайта cursivalead.cursiva-dev.ru. Когда сайт будет доступен, бот напишет сам.";
+  const text = `Заявки Cursiva
 
-  await bot.sendMessage(chatId, `Заявки Cursiva\n\n${readyText}`, {
-    reply_markup: replyKeyboard(),
-  });
+Когда на cursiva.ru оставляют заявку, сообщение приходит сюда.
+«Открыть заявки» ниже открывает список. «Заявки» слева от поля ввода делает то же самое.
+
+Текстом: /leads, /status 12 в работе, /note 12 текст.`;
+
+  const markup = msg.chat.type === "private"
+    ? { reply_markup: replyKeyboard() }
+    : { reply_markup: inlineWebApp() };
+
+  await bot.sendMessage(chatId, text, markup);
+  if (msg.chat.type === "private") {
+    await bot.sendMessage(chatId, "Список заявок", {
+      reply_markup: inlineWebApp(),
+    });
+  }
 }
 
 module.exports = { handleWebApp };
