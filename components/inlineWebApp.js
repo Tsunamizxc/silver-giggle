@@ -7,7 +7,7 @@ function inlineWebApp() {
     inline_keyboard: [
       [
         {
-          text: "Открыть заявки",
+          text: "Открыть офис",
           web_app: { url },
         },
       ],

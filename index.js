@@ -48,7 +48,13 @@ function startBot(botToken) {
   const commands = [
     { command: "start", description: "Открыть меню" },
     { command: "leads", description: "Последние заявки" },
-    { command: "help", description: "Команды и статусы" },
+    { command: "new", description: "Новая заявка вручную" },
+    { command: "task", description: "Добавить задачу" },
+    { command: "tasks", description: "Открытые задачи" },
+    { command: "done", description: "Отметить задачу сделанной" },
+    { command: "income", description: "Записать доход" },
+    { command: "expense", description: "Записать расход" },
+    { command: "help", description: "Команды" },
   ];
   bot.setMyCommands(commands).catch((error) => console.log(error));
   bot.setMyCommands(commands, { scope: { type: "all_group_chats" } }).catch((error) => console.log(error));
@@ -64,7 +70,7 @@ function startBot(botToken) {
           body: JSON.stringify({
             menu_button: {
               type: "web_app",
-              text: "Заявки",
+              text: "Офис",
               web_app: { url: webAppUrl },
             },
           }),

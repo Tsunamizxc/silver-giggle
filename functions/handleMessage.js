@@ -1,5 +1,6 @@
 const { startCommand } = require("../commands/start");
 const { helpText, sendLeads, setLeadStatus, setLeadNote, listUsers, changeUser } = require("../commands/text");
+const { openOffice, createLead, createTask, listTasks, completeTask, addMoney } = require("../commands/office");
 const { api } = require("./api");
 
 function commandParts(text) {
@@ -23,7 +24,14 @@ async function handleMessage(bot, msg) {
     "/users": "users",
     "/allow": "allow",
     "/deny": "deny",
+    "/new": "new",
+    "/task": "task",
+    "/tasks": "tasks",
+    "/done": "done",
+    "/income": "income",
+    "/expense": "expense",
     "заявки": "leads",
+    "офис": "office",
     "помощь": "help",
   };
   const action = aliases[command];
@@ -89,6 +97,30 @@ async function handleMessage(bot, msg) {
     await changeUser(bot, msg, args, action === "allow");
     return;
   }
+  if (action === "office") {
+    await openOffice(bot, msg);
+    return;
+  }
+  if (action === "new") {
+    await createLead(bot, msg, args);
+    return;
+  }
+  if (action === "task") {
+    await createTask(bot, msg, args);
+    return;
+  }
+  if (action === "tasks") {
+    await listTasks(bot, msg);
+    return;
+  }
+  if (action === "done") {
+    await completeTask(bot, msg, args);
+    return;
+  }
+  if (action === "income" || action === "expense") {
+    await addMoney(bot, msg, args, action);
+    return;
+  }
 
   if (msg.chat.type === "private") {
     await bot.sendMessage(msg.chat.id, "Напишите /leads, /help или /start.");
@@ -143,7 +175,7 @@ async function handleMembership(bot, update) {
 
   await bot.sendMessage(
     chat.id,
-    "Чат подключён. Заявки с cursiva.ru будут приходить сюда.\n\nКоманды: /leads, /status 12 в работе, /note 12 текст, /help"
+    "Чат подключён. Заявки с cursiva.ru будут приходить сюда.\n\nКоманды: /leads, /new, /task, /income, /expense, /help"
   );
 }
 
