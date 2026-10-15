@@ -1,9 +1,13 @@
 function replyKeyboard(chatType) {
-  const inGroup = chatType && chatType !== "private";
+  if (chatType && chatType !== "private") {
+    return { remove_keyboard: true };
+  }
+
   return {
-    keyboard: inGroup
-      ? [[{ text: "/leads" }, { text: "/office" }], [{ text: "/help" }]]
-      : [[{ text: "Заявки" }, { text: "Офис" }], [{ text: "Помощь" }]],
+    keyboard: [
+      [{ text: "Заявки" }, { text: "Офис" }],
+      [{ text: "Помощь" }],
+    ],
     resize_keyboard: true,
     is_persistent: true,
   };

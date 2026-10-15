@@ -1,6 +1,6 @@
 const { startCommand } = require("../commands/start");
 const { helpText, sendLeads, setLeadStatus, setLeadNote, listUsers, changeUser } = require("../commands/text");
-const { openOffice, createLead, createTask, listTasks, completeTask, addMoney } = require("../commands/office");
+const { openOffice, showMoney, createLead, createTask, listTasks, completeTask, addMoney } = require("../commands/office");
 const { inlineWebApp } = require("../components/inlineWebApp");
 const { replyKeyboard } = require("../components/replyKeyboard");
 const { api } = require("./api");
@@ -33,7 +33,11 @@ async function handleMessage(bot, msg) {
     "/income": "income",
     "/expense": "expense",
     "/office": "office",
+    "/money": "money",
+    "/menu": "help",
     "заявки": "leads",
+    "задачи": "tasks",
+    "деньги": "money",
     "офис": "office",
     "помощь": "help",
   };
@@ -102,6 +106,10 @@ async function handleMessage(bot, msg) {
   }
   if (action === "office") {
     await openOffice(bot, msg);
+    return;
+  }
+  if (action === "money") {
+    await showMoney(bot, msg);
     return;
   }
   if (action === "new") {
@@ -176,13 +184,45 @@ async function handleMembership(bot, update) {
   });
   if (!saved.ok) return;
 
-  await bot.sendMessage(chat.id, "Чат подключён. Заявки с cursiva.ru будут приходить сюда.\n\nКоманды те же, что в личке: /leads, /new, /task, /income, /expense, /help", {
+  await bot.sendMessage(chat.id, "Беседа подключена. Заявки с cursiva.ru будут приходить сюда.", {
     reply_markup: replyKeyboard(chat.type),
   });
-  await bot.sendMessage(chat.id, "Открыть офис", {
+  await bot.sendMessage(chat.id, "Меню", {
     disable_web_page_preview: true,
     reply_markup: inlineWebApp(chat.type),
   });
 }
 
-module.exports = { handleMessage, handleMembership };
+const BUTTON_COMMANDS = {
+  leads: "/leads",
+  tasks: "/tasks",
+  money: "/money",
+  help: "/help",
+};
+
+async function handleButton(bot, query) {
+  const command = BUTTON_COMMANDS[query.data];
+  if (!command || !query.message) {
+    await bot.answerCallbackQuery(query.id).catch(() => {});
+    return;
+  }
+
+  const users = await api("users");
+  const allowed = users.ok && (users.payload.users || []).some((user) => user.telegram_id === query.from.id);
+  if (!allowed) {
+    await bot.answerCallbackQuery(query.id, {
+      text: "Нет доступа. Бот открыт только для команды Cursiva.",
+      show_alert: true,
+    }).catch(() => {});
+    return;
+  }
+
+  await bot.answerCallbackQuery(query.id).catch(() => {});
+  await handleMessage(bot, {
+    chat: query.message.chat,
+    from: query.from,
+    text: command,
+  });
+}
+
+module.exports = { handleMessage, handleMembership, handleButton };

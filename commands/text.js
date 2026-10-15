@@ -141,7 +141,34 @@ async function changeUser(bot, msg, args, allow) {
   await bot.sendMessage(msg.chat.id, result.payload.message || (result.ok ? fallback : "Не получилось изменить доступ."));
 }
 
+async function groupHelp(bot, msg) {
+  const text = `Офис Cursiva в беседе
+
+Кнопки под сообщением: заявки, задачи, деньги.
+«Открыть офис» откроет личный чат с ботом, там приложение со всеми разделами.
+
+Добавить через беседу:
+/new Иван 79991234567 нужен сайт
+/task купить домен
+/done 12 — задача сделана
+/status 12 в работе
+/income 15000 оплата сайта
+/expense 3000 реклама`;
+
+  await bot.sendMessage(msg.chat.id, text, {
+    reply_markup: replyKeyboard(msg.chat.type),
+  });
+  await bot.sendMessage(msg.chat.id, "Меню", {
+    reply_markup: inlineWebApp(msg.chat.type),
+  });
+}
+
 async function helpText(bot, msg) {
+  if (msg.chat.type !== "private") {
+    await groupHelp(bot, msg);
+    return;
+  }
+
   const text = `Заявки Cursiva
 
 Форма на cursiva.ru присылает сообщение в этот чат и в подключённые группы.
@@ -165,7 +192,7 @@ async function helpText(bot, msg) {
 
 Статусы: активный, в работе, закрыт, отменен.
 В боте может быть не больше ${maxUsers()} человек.
-В группе работают те же команды. Кнопка «Открыть офис» под сообщением открывает приложение и в беседе.`;
+В беседе под сообщениями бота есть кнопки «Заявки», «Задачи», «Деньги».`;
 
   await bot.sendMessage(msg.chat.id, text, {
     reply_markup: replyKeyboard(msg.chat.type),

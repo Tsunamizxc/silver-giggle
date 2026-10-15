@@ -1,4 +1,4 @@
-const { handleMembership, handleMessage } = require("./functions/handleMessage");
+const { handleButton, handleMembership, handleMessage } = require("./functions/handleMessage");
 const { deliverPending } = require("./functions/deliverLeads");
 const { flushManagers } = require("./functions/registerManager");
 const { api } = require("./functions/api");
@@ -55,6 +55,8 @@ function startBot(botToken) {
     { command: "income", description: "Записать доход" },
     { command: "expense", description: "Записать расход" },
     { command: "office", description: "Открыть офис" },
+    { command: "money", description: "Доход, расход, прибыль" },
+    { command: "menu", description: "Меню кнопками" },
     { command: "help", description: "Команды" },
   ];
   bot.setMyCommands(commands).catch((error) => console.log(error));
@@ -89,6 +91,14 @@ function startBot(botToken) {
   bot.on("message", async (msg) => {
     try {
       await handleMessage(bot, msg);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  bot.on("callback_query", async (query) => {
+    try {
+      await handleButton(bot, query);
     } catch (error) {
       console.log(error);
     }

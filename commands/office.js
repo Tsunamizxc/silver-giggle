@@ -11,7 +11,32 @@ async function fail(bot, msg, result, fallback) {
 }
 
 async function openOffice(bot, msg) {
-  await bot.sendMessage(msg.chat.id, "Офис Cursiva: заявки, задачи и деньги. Внизу экрана три раздела.", {
+  const text = msg.chat.type === "private"
+    ? "Офис Cursiva: заявки, задачи и деньги. Внизу экрана три раздела."
+    : "Офис Cursiva. «Открыть офис» перейдёт в личный чат с ботом и откроет приложение.";
+  await bot.sendMessage(msg.chat.id, text, {
+    reply_markup: inlineWebApp(msg.chat.type),
+  });
+}
+
+async function showMoney(bot, msg) {
+  const result = await api(`finance_bot&actor_id=${msg.from.id}`);
+  if (!result.ok) {
+    await fail(bot, msg, result, "Деньги сейчас не открываются.");
+    return;
+  }
+  const month = result.payload.month || {};
+  const all = result.payload.all || {};
+  const text = `Деньги, ${result.payload.month_label}
+Доход: ${month.income_label}
+Расход: ${month.expense_label}
+Прибыль: ${month.profit_label}
+
+За всё время прибыль: ${all.profit_label}
+Проектов в работе: ${result.payload.progress_count}, на ${result.payload.progress_label}
+
+Записать: /income 15000 оплата, /expense 3000 реклама`;
+  await bot.sendMessage(msg.chat.id, text, {
     reply_markup: inlineWebApp(msg.chat.type),
   });
 }
@@ -68,7 +93,9 @@ async function listTasks(bot, msg) {
   const text = open.length
     ? `Открытые задачи\n\n${open.map((task) => `№ ${task.id} ${task.title}`).join("\n")}`
     : "Открытых задач нет.";
-  await bot.sendMessage(msg.chat.id, `${text}\n\nЗакрыть: /done 12`);
+  await bot.sendMessage(msg.chat.id, `${text}\n\nДобавить: /task текст. Закрыть: /done 12`, {
+    reply_markup: inlineWebApp(msg.chat.type),
+  });
 }
 
 async function completeTask(bot, msg, args) {
@@ -112,6 +139,7 @@ async function addMoney(bot, msg, args, kind) {
 
 module.exports = {
   openOffice,
+  showMoney,
   createLead,
   createTask,
   listTasks,
