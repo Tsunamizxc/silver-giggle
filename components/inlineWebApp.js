@@ -19,9 +19,7 @@ function officeLink(page) {
 
 function pageUrl(page) {
   const base = webAppUrl.endsWith("/") ? webAppUrl : `${webAppUrl}/`;
-  if (page === "finance") return `${base}finance/`;
-  if (page === "tasks") return `${base}?page=tasks`;
-  return base;
+  return page ? `${base}?page=${page}` : base;
 }
 
 function openLabel(page) {
