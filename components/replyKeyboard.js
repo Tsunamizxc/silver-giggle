@@ -1,11 +1,8 @@
-function replyKeyboard(chatType) {
-  if (chatType && chatType !== "private") {
-    return { remove_keyboard: true };
-  }
-
+function replyKeyboard() {
   return {
     keyboard: [
-      [{ text: "Заявки" }, { text: "Офис" }],
+      [{ text: "Заявки" }, { text: "Задачи" }],
+      [{ text: "Финансы" }, { text: "Офис" }],
       [{ text: "Помощь" }],
     ],
     resize_keyboard: true,

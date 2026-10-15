@@ -12,8 +12,8 @@ async function fail(bot, msg, result, fallback) {
 
 async function openOffice(bot, msg) {
   const text = msg.chat.type === "private"
-    ? "Офис Cursiva: заявки, задачи и деньги. Внизу экрана три раздела."
-    : "Офис Cursiva. «Открыть офис» перейдёт в личный чат с ботом и откроет приложение.";
+    ? "Офис Cursiva: заявки, задачи и финансы. Внизу экрана три раздела."
+    : "Офис Cursiva. «Открыть офис» откроет приложение прямо в беседе.";
   await bot.sendMessage(msg.chat.id, text, {
     reply_markup: inlineWebApp(msg.chat.type),
   });
@@ -22,22 +22,23 @@ async function openOffice(bot, msg) {
 async function showMoney(bot, msg) {
   const result = await api(`finance_bot&actor_id=${msg.from.id}`);
   if (!result.ok) {
-    await fail(bot, msg, result, "Деньги сейчас не открываются.");
+    await fail(bot, msg, result, "Финансы сейчас не открываются.");
     return;
   }
   const month = result.payload.month || {};
   const all = result.payload.all || {};
-  const text = `Деньги, ${result.payload.month_label}
-Доход: ${month.income_label}
-Расход: ${month.expense_label}
+  const text = `Финансы, ${result.payload.month_label}
+Выручка: ${month.income_label}
+Расходы: ${month.expense_label}
 Прибыль: ${month.profit_label}
 
+На счетах: ${result.payload.cash_label}
 За всё время прибыль: ${all.profit_label}
 Проектов в работе: ${result.payload.progress_count}, на ${result.payload.progress_label}
 
 Записать: /income 15000 оплата, /expense 3000 реклама`;
   await bot.sendMessage(msg.chat.id, text, {
-    reply_markup: inlineWebApp(msg.chat.type),
+    reply_markup: inlineWebApp(msg.chat.type, "finance"),
   });
 }
 
@@ -91,10 +92,15 @@ async function listTasks(bot, msg) {
   }
   const open = (result.payload.tasks || []).filter((task) => !task.done).slice(0, 15);
   const text = open.length
-    ? `Открытые задачи\n\n${open.map((task) => `№ ${task.id} ${task.title}`).join("\n")}`
+    ? `Открытые задачи\n\n${open
+        .map((task) => {
+          const bits = [task.status_label, task.priority === "urgent" || task.priority === "high" ? task.priority_label.toLowerCase() : "", task.overdue ? "просрочена" : ""].filter(Boolean);
+          return `№ ${task.id} ${task.title}${bits.length ? ` (${bits.join(", ").toLowerCase()})` : ""}`;
+        })
+        .join("\n")}`
     : "Открытых задач нет.";
   await bot.sendMessage(msg.chat.id, `${text}\n\nДобавить: /task текст. Закрыть: /done 12`, {
-    reply_markup: inlineWebApp(msg.chat.type),
+    reply_markup: inlineWebApp(msg.chat.type, "tasks"),
   });
 }
 

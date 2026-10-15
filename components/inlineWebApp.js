@@ -1,6 +1,18 @@
 require("dotenv").config();
 
-const officeLink = "https://t.me/cursivalead_bot?start=office";
+const botName = process.env.BOT_USERNAME || "cursivalead_bot";
+const webAppUrl = process.env.WEB_APP_URL || "https://cursivalead.cursiva-dev.ru/";
+
+function startAppLink(page) {
+  return `https://t.me/${botName}?startapp${page ? `=${page}` : ""}`;
+}
+
+function pageUrl(page) {
+  const base = webAppUrl.endsWith("/") ? webAppUrl : `${webAppUrl}/`;
+  if (page === "finance") return `${base}finance/`;
+  if (page === "tasks") return `${base}?page=tasks`;
+  return base;
+}
 
 function groupMenu() {
   return {
@@ -10,27 +22,29 @@ function groupMenu() {
         { text: "Задачи", callback_data: "tasks" },
       ],
       [
-        { text: "Деньги", callback_data: "money" },
+        { text: "Финансы", callback_data: "money" },
         { text: "Помощь", callback_data: "help" },
       ],
-      [{ text: "Открыть офис", url: officeLink }],
+      [{ text: "Открыть офис", url: startAppLink() }],
     ],
   };
 }
 
-function inlineWebApp(chatType) {
-  if (chatType && chatType !== "private") return groupMenu();
+function inlineWebApp(chatType, page) {
+  if (chatType && chatType !== "private") {
+    if (!page) return groupMenu();
+    return { inline_keyboard: [[{ text: openLabel(page), url: startAppLink(page) }]] };
+  }
 
   return {
-    inline_keyboard: [
-      [
-        {
-          text: "Открыть офис",
-          web_app: { url: process.env.WEB_APP_URL || "https://cursivalead.cursiva-dev.ru/" },
-        },
-      ],
-    ],
+    inline_keyboard: [[{ text: openLabel(page), web_app: { url: pageUrl(page) } }]],
   };
 }
 
-module.exports = { inlineWebApp, groupMenu };
+function openLabel(page) {
+  if (page === "finance") return "Открыть финансы";
+  if (page === "tasks") return "Открыть задачи";
+  return "Открыть офис";
+}
+
+module.exports = { inlineWebApp, groupMenu, startAppLink };

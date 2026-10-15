@@ -55,7 +55,7 @@ function startBot(botToken) {
     { command: "income", description: "Записать доход" },
     { command: "expense", description: "Записать расход" },
     { command: "office", description: "Открыть офис" },
-    { command: "money", description: "Доход, расход, прибыль" },
+    { command: "money", description: "Финансы: выручка, расходы, прибыль" },
     { command: "menu", description: "Меню кнопками" },
     { command: "help", description: "Команды" },
   ];

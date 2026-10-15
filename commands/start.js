@@ -18,7 +18,7 @@ async function startCommand(bot, msg) {
     await bot.sendMessage(msg.chat.id, "Офис Cursiva", {
       reply_markup: replyKeyboard(msg.chat.type),
     });
-    await bot.sendMessage(msg.chat.id, "Нажмите, чтобы открыть заявки, задачи и деньги.", {
+    await bot.sendMessage(msg.chat.id, "Нажмите, чтобы открыть заявки, задачи и финансы.", {
       reply_markup: inlineWebApp(msg.chat.type),
     });
     return;

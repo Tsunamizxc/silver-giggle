@@ -38,6 +38,8 @@ async function handleMessage(bot, msg) {
     "заявки": "leads",
     "задачи": "tasks",
     "деньги": "money",
+    "финансы": "money",
+    "/finance": "money",
     "офис": "office",
     "помощь": "help",
   };
