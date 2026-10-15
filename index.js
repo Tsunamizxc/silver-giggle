@@ -21,31 +21,39 @@ function startBot(botToken) {
   const bot = new TelegramBot(botToken, { polling: true });
 
   function paintButton(button) {
-    if (!button || button.style || button.web_app || button.request_contact) {
+    if (!button || typeof button !== "object" || button.style) {
       return button;
     }
     return { ...button, style: "primary" };
   }
 
+  function paintRows(rows) {
+    return rows.map((row) => (Array.isArray(row) ? row.map(paintButton) : row));
+  }
+
   function paintMarkup(markup) {
-    if (!markup || !Array.isArray(markup.keyboard)) {
+    if (!markup || typeof markup !== "object") {
       return markup;
     }
+    const painted = { ...markup };
+    if (Array.isArray(markup.keyboard)) painted.keyboard = paintRows(markup.keyboard);
+    if (Array.isArray(markup.inline_keyboard)) painted.inline_keyboard = paintRows(markup.inline_keyboard);
+    return painted;
+  }
 
-    return {
-      ...markup,
-      keyboard: markup.keyboard.map((row) => row.map(paintButton)),
-    };
+  function withPaint(options) {
+    if (!options || !options.reply_markup) return options;
+    return { ...options, reply_markup: paintMarkup(options.reply_markup) };
   }
 
   const sendMessage = bot.sendMessage.bind(bot);
+  bot.sendMessage = (chatId, text, options = {}) => sendMessage(chatId, text, withPaint(options));
 
-  bot.sendMessage = (chatId, text, options = {}) => {
-    if (options.reply_markup) {
-      options = { ...options, reply_markup: paintMarkup(options.reply_markup) };
-    }
-    return sendMessage(chatId, text, options);
-  };
+  const editMessageText = bot.editMessageText.bind(bot);
+  bot.editMessageText = (text, options = {}) => editMessageText(text, withPaint(options));
+
+  const editMessageReplyMarkup = bot.editMessageReplyMarkup.bind(bot);
+  bot.editMessageReplyMarkup = (markup, options = {}) => editMessageReplyMarkup(paintMarkup(markup), options);
 
   const commands = [
     { command: "start", description: "Открыть меню" },
