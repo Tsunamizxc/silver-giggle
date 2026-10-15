@@ -1,5 +1,5 @@
 const { api, maxUsers } = require("../functions/api");
-const { inlineWebApp } = require("../components/inlineWebApp");
+const { inlineWebApp, mainAppEnabled } = require("../components/inlineWebApp");
 const { replyKeyboard } = require("../components/replyKeyboard");
 
 const STATUS_WORDS = new Map([
@@ -145,7 +145,9 @@ async function groupHelp(bot, msg) {
   const text = `Офис Cursiva в беседе
 
 Кнопки внизу и под сообщением: заявки, задачи, финансы.
-«Открыть офис» откроет приложение прямо в беседе: заявки, доска задач и финансы студии.
+${mainAppEnabled()
+    ? "«Открыть офис» откроет приложение прямо в беседе: заявки, доска задач и финансы студии."
+    : "«Открыть офис» откроет личный чат с ботом, там приложение: заявки, доска задач и финансы."}
 
 Добавить через беседу:
 /new Иван 79991234567 нужен сайт
@@ -192,7 +194,7 @@ async function helpText(bot, msg) {
 
 Статусы: активный, в работе, закрыт, отменен.
 В боте может быть не больше ${maxUsers()} человек.
-В беседе есть кнопки «Заявки», «Задачи», «Финансы», а «Открыть офис» запускает приложение прямо там.`;
+В беседе есть кнопки «Заявки», «Задачи», «Финансы» и «Открыть офис».`;
 
   await bot.sendMessage(msg.chat.id, text, {
     reply_markup: replyKeyboard(msg.chat.type),

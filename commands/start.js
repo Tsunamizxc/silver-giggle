@@ -14,12 +14,13 @@ async function startCommand(bot, msg) {
     return;
   }
   const payload = String(msg.text || "").trim().split(/\s+/)[1] || "";
-  if (payload === "office" && msg.chat.type === "private") {
+  const pages = { office: "", tasks: "tasks", finance: "finance" };
+  if (payload in pages && msg.chat.type === "private") {
     await bot.sendMessage(msg.chat.id, "Офис Cursiva", {
       reply_markup: replyKeyboard(msg.chat.type),
     });
     await bot.sendMessage(msg.chat.id, "Нажмите, чтобы открыть заявки, задачи и финансы.", {
-      reply_markup: inlineWebApp(msg.chat.type),
+      reply_markup: inlineWebApp(msg.chat.type, pages[payload]),
     });
     return;
   }

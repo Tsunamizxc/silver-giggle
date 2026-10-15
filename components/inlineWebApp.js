@@ -2,9 +2,19 @@ require("dotenv").config();
 
 const botName = process.env.BOT_USERNAME || "cursivalead_bot";
 const webAppUrl = process.env.WEB_APP_URL || "https://cursivalead.cursiva-dev.ru/";
+let mainApp = false;
 
-function startAppLink(page) {
-  return `https://t.me/${botName}?startapp${page ? `=${page}` : ""}`;
+function setMainApp(value) {
+  mainApp = !!value;
+}
+
+function mainAppEnabled() {
+  return mainApp;
+}
+
+function officeLink(page) {
+  if (mainApp) return `https://t.me/${botName}?startapp${page ? `=${page}` : ""}`;
+  return `https://t.me/${botName}?start=${page || "office"}`;
 }
 
 function pageUrl(page) {
@@ -12,6 +22,12 @@ function pageUrl(page) {
   if (page === "finance") return `${base}finance/`;
   if (page === "tasks") return `${base}?page=tasks`;
   return base;
+}
+
+function openLabel(page) {
+  if (page === "finance") return "Открыть финансы";
+  if (page === "tasks") return "Открыть задачи";
+  return "Открыть офис";
 }
 
 function groupMenu() {
@@ -25,7 +41,7 @@ function groupMenu() {
         { text: "Финансы", callback_data: "money" },
         { text: "Помощь", callback_data: "help" },
       ],
-      [{ text: "Открыть офис", url: startAppLink() }],
+      [{ text: "Открыть офис", url: officeLink() }],
     ],
   };
 }
@@ -33,7 +49,7 @@ function groupMenu() {
 function inlineWebApp(chatType, page) {
   if (chatType && chatType !== "private") {
     if (!page) return groupMenu();
-    return { inline_keyboard: [[{ text: openLabel(page), url: startAppLink(page) }]] };
+    return { inline_keyboard: [[{ text: openLabel(page), url: officeLink(page) }]] };
   }
 
   return {
@@ -41,10 +57,4 @@ function inlineWebApp(chatType, page) {
   };
 }
 
-function openLabel(page) {
-  if (page === "finance") return "Открыть финансы";
-  if (page === "tasks") return "Открыть задачи";
-  return "Открыть офис";
-}
-
-module.exports = { inlineWebApp, groupMenu, startAppLink };
+module.exports = { inlineWebApp, groupMenu, officeLink, setMainApp, mainAppEnabled };

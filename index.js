@@ -2,6 +2,7 @@ const { handleButton, handleMembership, handleMessage } = require("./functions/h
 const { deliverPending } = require("./functions/deliverLeads");
 const { flushManagers } = require("./functions/registerManager");
 const { api } = require("./functions/api");
+const { setMainApp } = require("./components/inlineWebApp");
 
 require("dotenv").config();
 
@@ -87,6 +88,18 @@ function startBot(botToken) {
   }
 
   setMenuButton();
+
+  async function checkMainApp() {
+    try {
+      const me = await bot.getMe();
+      setMainApp(me.has_main_web_app);
+    } catch (error) {
+      console.log(error.message || error);
+    }
+  }
+
+  checkMainApp();
+  setInterval(checkMainApp, 10 * 60 * 1000);
 
   bot.on("message", async (msg) => {
     try {

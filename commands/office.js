@@ -1,5 +1,5 @@
 const { api } = require("../functions/api");
-const { inlineWebApp } = require("../components/inlineWebApp");
+const { inlineWebApp, mainAppEnabled } = require("../components/inlineWebApp");
 
 function actorBody(msg, extra) {
   return Object.assign({ actor_id: msg.from.id }, extra || {});
@@ -13,7 +13,9 @@ async function fail(bot, msg, result, fallback) {
 async function openOffice(bot, msg) {
   const text = msg.chat.type === "private"
     ? "Офис Cursiva: заявки, задачи и финансы. Внизу экрана три раздела."
-    : "Офис Cursiva. «Открыть офис» откроет приложение прямо в беседе.";
+    : mainAppEnabled()
+      ? "Офис Cursiva. «Открыть офис» откроет приложение прямо в беседе."
+      : "Офис Cursiva. «Открыть офис» перейдёт в личный чат с ботом и откроет приложение.";
   await bot.sendMessage(msg.chat.id, text, {
     reply_markup: inlineWebApp(msg.chat.type),
   });
