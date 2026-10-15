@@ -2,7 +2,7 @@ const { api } = require("../functions/api");
 const { inlineWebApp, mainAppEnabled } = require("../components/inlineWebApp");
 
 function actorBody(msg, extra) {
-  return Object.assign({ actor_id: msg.from.id }, extra || {});
+  return Object.assign({ actor_id: msg.from.id, chat_id: msg.chat.id }, extra || {});
 }
 
 async function fail(bot, msg, result, fallback) {

@@ -80,7 +80,7 @@ async function setLeadStatus(bot, msg, args) {
 
   const result = await api("status_bot", {
     method: "POST",
-    body: { id, status, actor_id: msg.from.id },
+    body: { id, status, actor_id: msg.from.id, chat_id: msg.chat.id },
   });
   const message = result.payload.message || (result.ok ? `№ ${id}: ${STATUS_LABELS[status]}` : "Статус не изменился.");
   await bot.sendMessage(msg.chat.id, message);
@@ -96,7 +96,7 @@ async function setLeadNote(bot, msg, args) {
 
   const result = await api("note_bot", {
     method: "POST",
-    body: { id, note, actor_id: msg.from.id },
+    body: { id, note, actor_id: msg.from.id, chat_id: msg.chat.id },
   });
   await bot.sendMessage(msg.chat.id, result.ok ? `Заметка к № ${id} сохранена.` : (result.payload.message || "Заметку не удалось сохранить."));
 }

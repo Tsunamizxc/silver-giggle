@@ -1,5 +1,6 @@
 const { handleButton, handleMembership, handleMessage } = require("./functions/handleMessage");
 const { deliverPending } = require("./functions/deliverLeads");
+const { deliverNotifications } = require("./functions/deliverNotifications");
 const { flushManagers } = require("./functions/registerManager");
 const { api } = require("./functions/api");
 const { setMainApp } = require("./components/inlineWebApp");
@@ -143,6 +144,7 @@ function startBot(botToken) {
       }
       await flushManagers(bot);
       await deliverPending(bot);
+      await deliverNotifications(bot);
     } catch (error) {
       console.log(error);
     } finally {
