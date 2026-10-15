@@ -17,8 +17,24 @@ if (!token) {
 startBot(token);
 
 function startBot(botToken) {
+  const https = require("https");
   const TelegramBot = require("node-telegram-bot-api");
-  const bot = new TelegramBot(botToken, { polling: true });
+  const agent = new https.Agent({ keepAlive: true, keepAliveMsecs: 15000, maxSockets: 6 });
+  const bot = new TelegramBot(botToken, {
+    polling: { interval: 500, params: { timeout: 8 } },
+    request: { agent, timeout: 15000 },
+  });
+
+  async function retry(call) {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await call();
+      } catch (error) {
+        if (error.code !== "EFATAL" || attempt >= 4) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
 
   function paintButton(button) {
     if (!button || typeof button !== "object" || button.style) {
@@ -47,13 +63,16 @@ function startBot(botToken) {
   }
 
   const sendMessage = bot.sendMessage.bind(bot);
-  bot.sendMessage = (chatId, text, options = {}) => sendMessage(chatId, text, withPaint(options));
+  bot.sendMessage = (chatId, text, options = {}) => retry(() => sendMessage(chatId, text, withPaint(options)));
 
   const editMessageText = bot.editMessageText.bind(bot);
-  bot.editMessageText = (text, options = {}) => editMessageText(text, withPaint(options));
+  bot.editMessageText = (text, options = {}) => retry(() => editMessageText(text, withPaint(options)));
 
   const editMessageReplyMarkup = bot.editMessageReplyMarkup.bind(bot);
-  bot.editMessageReplyMarkup = (markup, options = {}) => editMessageReplyMarkup(paintMarkup(markup), options);
+  bot.editMessageReplyMarkup = (markup, options = {}) => retry(() => editMessageReplyMarkup(paintMarkup(markup), options));
+
+  const answerCallbackQuery = bot.answerCallbackQuery.bind(bot);
+  bot.answerCallbackQuery = (...args) => retry(() => answerCallbackQuery(...args));
 
   const commands = [
     { command: "start", description: "Открыть меню" },

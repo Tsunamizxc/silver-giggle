@@ -17,11 +17,22 @@ async function api(action, options = {}) {
   };
   if (options.body) headers["Content-Type"] = "application/json";
 
-  const response = await fetch(apiUrl(action), {
-    method: options.method || "GET",
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response;
+  try {
+    response = await fetch(apiUrl(action), {
+      method: options.method || "GET",
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    console.log(`${action}: ${error.message || error}`);
+    return {
+      ok: false,
+      status: 0,
+      payload: { message: "Сайт офиса не ответил, попробуйте ещё раз через минуту." },
+    };
+  }
 
   let payload = null;
   try {

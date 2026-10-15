@@ -14,6 +14,7 @@ async function deliverNotifications(bot) {
   try {
     const response = await fetch(`${url}?action=notify_pending`, {
       headers: { "X-Bot-Secret": secret },
+      signal: AbortSignal.timeout(15000),
     });
     if (!response.ok) return;
     payload = await response.json();
@@ -58,6 +59,7 @@ async function deliverNotifications(bot) {
         "Content-Type": "application/json",
         "X-Bot-Secret": secret,
       },
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({ ids: done }),
     });
   } catch (error) {
